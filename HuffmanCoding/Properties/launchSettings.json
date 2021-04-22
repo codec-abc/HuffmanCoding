@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "HuffmanCoding": {
+      "commandName": "Project",
+      "workingDirectory": "./"
+    }
+  }
+}
