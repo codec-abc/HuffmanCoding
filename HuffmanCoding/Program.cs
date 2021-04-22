@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace HuffmanCoding
 {
@@ -43,7 +44,7 @@ namespace HuffmanCoding
 
             var flattenTable = table.Table.Select(entry =>
             {
-                return new Tuple<byte, List<HuffmanTable<byte>.HuffmanPath>>(entry.Key, entry.Value);
+                return new Tuple<byte, List<HuffmanPath.Path>>(entry.Key, entry.Value);
             }
             ).ToList();
 
@@ -51,10 +52,37 @@ namespace HuffmanCoding
 
             foreach (var entry in flattenTable)
             {
-                Console.WriteLine("byte " + Convert.ToChar(entry.Item1) + " has a sequence of " + entry.Item2.Count);
+                var valAndNbBytes = HuffmanPathToValueAndNbBits(entry.Item2);
+                var encodedValue = valAndNbBytes.Item1;
+                var nbBits = valAndNbBytes.Item2;
+                //Console.WriteLine(encodedValue + " " + Convert.ToString((int)encodedValue, 2) + " " + nbBits);
+                Console.Write("byte " + Convert.ToChar(entry.Item1) + " has a sequence of " + entry.Item2.Count + " and is encoded ");
+                for (var i = nbBits - 1; i >= 0; i--)
+                {
+                    var bitIndex = 1 << i;
+                    var value = encodedValue & bitIndex;
+                    var toPrint = value != 0 ? "1" : "0";
+                    Console.Write(toPrint);
+                }
+                Console.WriteLine("");
             }
-
+            
             Console.ReadLine();
+        }
+
+        static Tuple<int, int> HuffmanPathToValueAndNbBits(List<HuffmanPath.Path> path)
+        {
+            int value = 0;
+            int nbBits = 0;
+
+            foreach(var dir in path)
+            {
+                value = value << 1;
+                var newBit = dir == HuffmanPath.Path.Left ? 0 : 1;
+                value = value | newBit;
+                nbBits += 1;
+            }
+            return new Tuple<int, int>(value, nbBits);
         }
     }
 }
