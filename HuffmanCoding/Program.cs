@@ -10,29 +10,49 @@ namespace HuffmanCoding
 
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
-
             var bytes = System.IO.File.ReadAllBytes("./words.txt");
-            var count = new Dictionary<byte, int>();
+            var bytesFreq = new Dictionary<byte, int>();
 
             foreach(var b in bytes)
             {
-                if (!count.ContainsKey(b))
+                if (!bytesFreq.ContainsKey(b))
                 {
-                    count.Add(b, 0);
+                    bytesFreq.Add(b, 0);
                 }
 
-                count[b] = count[b] + 1;
+                bytesFreq[b] = bytesFreq[b] + 1;
             }
 
-            var flatDict = count.Select(a => new Tuple<byte, int>(a.Key, a.Value)).ToList();
+            var flattenDict = bytesFreq.Select(dictEntry => new HuffmanEntry<byte>()
+            {
+                value = dictEntry.Key,
+                frequency = dictEntry.Value
+            }).ToList();
 
-            flatDict.Sort((a, b) => a.Item2 - b.Item2);
+            flattenDict.Sort((a,b) => a.value - b.value);
 
-            //foreach(var entry in flatDict)
-            //{
-            //    Console.WriteLine("byte " + entry.Item1 + " appears " + entry.Item2);
-            //}
+            foreach (var entry in flattenDict)
+            {
+                Console.WriteLine("byte " + Convert.ToChar(entry.value) + " appear " + entry.frequency + " times");
+            }
+
+            Console.WriteLine("----------");
+
+            var tree = HuffmanTree<byte>.BuildTree(flattenDict);
+            var table = HuffmanTable<byte>.BuildTableFromTree(tree);
+
+            var flattenTable = table.Table.Select(entry =>
+            {
+                return new Tuple<byte, List<HuffmanTable<byte>.HuffmanPath>>(entry.Key, entry.Value);
+            }
+            ).ToList();
+
+            flattenTable.Sort((a, b) => a.Item1 - b.Item1);
+
+            foreach (var entry in flattenTable)
+            {
+                Console.WriteLine("byte " + Convert.ToChar(entry.Item1) + " has a sequence of " + entry.Item2.Count);
+            }
 
             Console.ReadLine();
         }
