@@ -96,21 +96,21 @@ namespace HuffmanCoding
                 nbBits += entry.nbBits;
                 nbBitsTotal += entry.nbBits;
 
-                Console.Write("pushing ");
+                //Console.Write("pushing ");
 
-                for (var i = entry.nbBits - 1; i >= 0; i--)
-                {
-                    var bitIndex = 1 << i;
-                    var value = entry.value & bitIndex;
-                    var toPrint = value != 0 ? "1" : "0";
-                    Console.Write(toPrint);
-                }
+                //for (var i = entry.nbBits - 1; i >= 0; i--)
+                //{
+                //    var bitIndex = 1 << i;
+                //    var value = entry.value & bitIndex;
+                //    var toPrint = value != 0 ? "1" : "0";
+                //    Console.Write(toPrint);
+                //}
 
-                Console.WriteLine("");
+                //Console.WriteLine("");
 
-                //Console.WriteLine(" on " + entry.nbBits + " bits. Total bits is now " + nbBitsTotal);
-                Console.Write("toWrite ");
-                debugPrintBinary(toWrite);
+                Console.WriteLine(" on " + entry.nbBits + " bits. Total bits is now " + nbBitsTotal);
+                //Console.Write("toWrite ");
+                //debugPrintBinary(toWrite);
 
                 if (nbBits >= 8)
                 {
@@ -118,11 +118,11 @@ namespace HuffmanCoding
                     var deltaShift = nbBits - 8;
                     var shiftBack = copy >> deltaShift;
                     
-                    Console.WriteLine("deltaShift " + deltaShift);
+                    //Console.WriteLine("deltaShift " + deltaShift);
                     var bytesToWrite = shiftBack.ToByteArray();
 
-                    Console.Write("Writing on " + bytesToWrite.Length + " byte(s) ");
-                    debugPrintBinary(shiftBack);
+                    //Console.Write("Writing on " + bytesToWrite.Length + " byte(s) ");
+                    //debugPrintBinary(shiftBack);
 
 
                     fs.Write(bytesToWrite, 0, 1);
@@ -132,20 +132,21 @@ namespace HuffmanCoding
                         mask = mask << 1;
                         mask = mask + 1;
                     }
-                    Console.WriteLine("mask " + Convert.ToString(mask, 2).PadLeft(8, '0'));
+                    //Console.WriteLine("mask " + Convert.ToString(mask, 2).PadLeft(8, '0'));
                     toWrite = toWrite & mask;
                     nbBits = nbBits - 8;
-                    Console.Write("toWrite [2] ");
-                    debugPrintBinary(toWrite);
+                    //Console.Write("toWrite [2] ");
+                    //debugPrintBinary(toWrite);
                 }
             }
 
             if (nbBits > 0)
             {
-                var shift = 64 - nbBits;
+                debugPrintBinary(toWrite);
+                var shift = 8 - nbBits;
                 toWrite = toWrite << shift;
                 var bytesToWrite = toWrite.ToByteArray();
-                Console.WriteLine("writing byte array " + bytesToWrite);
+                //Console.WriteLine("writing byte array " + bytesToWrite);
                 fs.Write(bytesToWrite, 0, 1);
             }
 
