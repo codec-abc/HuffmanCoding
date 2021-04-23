@@ -38,18 +38,11 @@ namespace HuffmanCoding
 
             var flattenDict = bytesFreq.Select(dictEntry => new HuffmanEntry<byte>()
             {
-                value = dictEntry.Key,
-                frequency = dictEntry.Value
+                Value = dictEntry.Key,
+                Frequency = dictEntry.Value
             }).ToList();
 
-            flattenDict.Sort((a, b) => a.value - b.value);
-
-            foreach (var entry in flattenDict)
-            {
-                Console.WriteLine("byte " + Convert.ToChar(entry.value) + " appear " + entry.frequency + " times");
-            }
-
-            Console.WriteLine("----------");
+            flattenDict.Sort((a, b) => a.Value - b.Value);
 
             var tree = HuffmanTree<byte>.BuildTree(flattenDict);
             var table = HuffmanTable<byte>.BuildTableFromTree(tree);
@@ -67,23 +60,12 @@ namespace HuffmanCoding
             foreach (var entry in flattenTable)
             {
                 var huffmanEntry = HuffmanPathToValueAndNbBits(entry.Item2);
-                var encodedValue = huffmanEntry.value;
-                var nbBitsEntry = huffmanEntry.nbBits;
-
-                Console.Write("byte " + Convert.ToChar(entry.Item1) + " has a sequence of " + entry.Item2.Count + " and is encoded ");
-                for (var i = nbBitsEntry - 1; i >= 0; i--)
-                {
-                    var bitIndex = 1 << i;
-                    var value = encodedValue & bitIndex;
-                    var toPrint = value != 0 ? "1" : "0";
-                    Console.Write(toPrint);
-                }
-                Console.WriteLine("");
+                var encodedValue = huffmanEntry.EncodedValue;
+                var nbBitsEntry = huffmanEntry.NbBits;
 
                 huffmanBinaryTable.Add(entry.Item1, huffmanEntry);
             }
-
-            Console.WriteLine("----------");
+            
             WriteCompressedFiles(outputFile, outputTableFile, bytes, huffmanBinaryTable);
         }
 
@@ -104,12 +86,11 @@ namespace HuffmanCoding
             foreach (var b in bytes)
             {
                 var entry = huffmanBinaryTable[b];
-                toWrite = toWrite << entry.nbBits;
-                toWrite = toWrite + entry.value;
+                toWrite = toWrite << entry.NbBits;
+                toWrite = toWrite + entry.EncodedValue;
 
-                //Console.WriteLine("writing " + b + " as " + entry.value + " " + Convert.ToString(entry.value, 2).PadLeft(entry.nbBits, '0') + " on " + entry.nbBits + " bits");
-                nbBits += entry.nbBits;
-                nbBitsTotal += entry.nbBits;
+                nbBits += entry.NbBits;
+                nbBitsTotal += entry.NbBits;
                 if (nbBits >= NB_BITS_PACKED)
                 {
                     var copy = toWrite;
@@ -141,8 +122,8 @@ namespace HuffmanCoding
 
             HuffmanDecodingData data = new HuffmanDecodingData()
             {
-                nbElements = bytes.Length,
-                table = huffmanBinaryTable
+                NbElements = bytes.Length,
+                Table = huffmanBinaryTable
             };
 
             var jsonString = JsonConvert.SerializeObject(data, Formatting.Indented);
@@ -155,15 +136,15 @@ namespace HuffmanCoding
             var huffmanData = JsonConvert.DeserializeObject<HuffmanDecodingData>(data);
 
             var bytesToDecode = File.ReadAllBytes(compressedFilePath);
-            var decoded = new List<byte>((int) huffmanData.nbElements);
+            var decoded = new List<byte>((int) huffmanData.NbElements);
 
             BigInteger symbolsRead = 0;
             BigInteger startingBitIndex = 0;
             BigInteger length = 1;
 
-            while(symbolsRead < huffmanData.nbElements)
+            while(symbolsRead < huffmanData.NbElements)
             {
-                BigInteger currentValue = getNumberFromBitsArray(startingBitIndex, length, bytesToDecode);
+                BigInteger currentValue = GetNumberFromBitsArray(startingBitIndex, length, bytesToDecode);
 
                 byte byteValue;
 
@@ -183,7 +164,7 @@ namespace HuffmanCoding
             File.WriteAllBytes(outputPath, decoded.ToArray());
         }
 
-        private static BigInteger getNumberFromBitsArray
+        private static BigInteger GetNumberFromBitsArray
         (
             BigInteger startingBitIndex, 
             BigInteger length, 
@@ -227,9 +208,9 @@ namespace HuffmanCoding
         )
         {
             byteValue = 0;
-            foreach (var entry in huffmanData.table)
+            foreach (var entry in huffmanData.Table)
             {
-                if (entry.Value.nbBits == nbBits && currentValue == entry.Value.value)
+                if (entry.Value.NbBits == nbBits && currentValue == entry.Value.EncodedValue)
                 {
                     byteValue = entry.Key;
                     return true;
@@ -237,16 +218,6 @@ namespace HuffmanCoding
             }
 
             return false;
-        }
-
-        static void debugPrintBinary(BigInteger number)
-        {
-            var bytesToWrite = number.ToByteArray();
-            //Console.WriteLine("bigInte encoded on " + bytesToWrite.Length + " bytes");
-            var toWriteDebug = bytesToWrite.Select(a => Convert.ToString(a, 2).PadLeft(8, '0')).ToList();
-            toWriteDebug.Reverse();
-            var debugPrint = toWriteDebug.Aggregate((a, c) => a + "|" + c);
-            Console.WriteLine("debug " + debugPrint);
         }
 
         static HuffmanTableEntry HuffmanPathToValueAndNbBits(List<HuffmanPath.Path> path)
@@ -264,21 +235,21 @@ namespace HuffmanCoding
 
             return new HuffmanTableEntry
             {
-                value = value,
-                nbBits = nbBits
+                EncodedValue = value,
+                NbBits = nbBits
             };
         }
 
         class HuffmanTableEntry
         {
-            public int nbBits;
-            public int value;
+            public int NbBits;
+            public int EncodedValue;
         }
 
         class HuffmanDecodingData
         {
-            public BigInteger nbElements;
-            public Dictionary<byte, HuffmanTableEntry> table;
+            public BigInteger NbElements;
+            public Dictionary<byte, HuffmanTableEntry> Table;
         }
     }
 }

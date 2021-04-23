@@ -1,117 +1,117 @@
 {
-  "nbElements": 3733450,
-  "table": {
+  "NbElements": 3733450,
+  "Table": {
     "10": {
-      "nbBits": 3,
-      "value": 0
+      "NbBits": 3,
+      "EncodedValue": 0
     },
     "45": {
-      "nbBits": 10,
-      "value": 411
+      "NbBits": 10,
+      "EncodedValue": 411
     },
     "97": {
-      "nbBits": 4,
-      "value": 15
+      "NbBits": 4,
+      "EncodedValue": 15
     },
     "98": {
-      "nbBits": 6,
-      "value": 24
+      "NbBits": 6,
+      "EncodedValue": 24
     },
     "99": {
-      "nbBits": 5,
-      "value": 13
+      "NbBits": 5,
+      "EncodedValue": 13
     },
     "100": {
-      "nbBits": 6,
-      "value": 54
+      "NbBits": 6,
+      "EncodedValue": 54
     },
     "101": {
-      "nbBits": 3,
-      "value": 5
+      "NbBits": 3,
+      "EncodedValue": 5
     },
     "102": {
-      "nbBits": 6,
-      "value": 17
+      "NbBits": 6,
+      "EncodedValue": 17
     },
     "103": {
-      "nbBits": 6,
-      "value": 32
+      "NbBits": 6,
+      "EncodedValue": 32
     },
     "104": {
-      "nbBits": 6,
-      "value": 16
+      "NbBits": 6,
+      "EncodedValue": 16
     },
     "105": {
-      "nbBits": 4,
-      "value": 14
+      "NbBits": 4,
+      "EncodedValue": 14
     },
     "106": {
-      "nbBits": 9,
-      "value": 204
+      "NbBits": 9,
+      "EncodedValue": 204
     },
     "107": {
-      "nbBits": 11,
-      "value": 821
+      "NbBits": 11,
+      "EncodedValue": 821
     },
     "108": {
-      "nbBits": 5,
-      "value": 26
+      "NbBits": 5,
+      "EncodedValue": 26
     },
     "109": {
-      "nbBits": 5,
-      "value": 9
+      "NbBits": 5,
+      "EncodedValue": 9
     },
     "110": {
-      "nbBits": 4,
-      "value": 9
+      "NbBits": 4,
+      "EncodedValue": 9
     },
     "111": {
-      "nbBits": 4,
-      "value": 5
+      "NbBits": 4,
+      "EncodedValue": 5
     },
     "112": {
-      "nbBits": 6,
-      "value": 55
+      "NbBits": 6,
+      "EncodedValue": 55
     },
     "113": {
-      "nbBits": 8,
-      "value": 103
+      "NbBits": 8,
+      "EncodedValue": 103
     },
     "114": {
-      "nbBits": 4,
-      "value": 12
+      "NbBits": 4,
+      "EncodedValue": 12
     },
     "115": {
-      "nbBits": 3,
-      "value": 1
+      "NbBits": 3,
+      "EncodedValue": 1
     },
     "116": {
-      "nbBits": 4,
-      "value": 7
+      "NbBits": 4,
+      "EncodedValue": 7
     },
     "117": {
-      "nbBits": 5,
-      "value": 17
+      "NbBits": 5,
+      "EncodedValue": 17
     },
     "118": {
-      "nbBits": 7,
-      "value": 66
+      "NbBits": 7,
+      "EncodedValue": 66
     },
     "119": {
-      "nbBits": 11,
-      "value": 820
+      "NbBits": 11,
+      "EncodedValue": 820
     },
     "120": {
-      "nbBits": 8,
-      "value": 100
+      "NbBits": 8,
+      "EncodedValue": 100
     },
     "121": {
-      "nbBits": 8,
-      "value": 101
+      "NbBits": 8,
+      "EncodedValue": 101
     },
     "122": {
-      "nbBits": 7,
-      "value": 67
+      "NbBits": 7,
+      "EncodedValue": 67
     }
   }
 }

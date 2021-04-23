@@ -1,21 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Text;
 
 namespace HuffmanCoding
 {
     public class HuffmanTree<T>
     {
-        public HuffmanBinaryNode<T> root;
+        public HuffmanBinaryNode<T> Root;
 
         public static HuffmanTree<T> BuildTree(List<HuffmanEntry<T>> items)
         {
             var nodes = items.Select(a => new HuffmanBinaryNode<T>()
             {
-                weight = a.frequency,
-                Value = a.value,
+                Weight = a.Frequency,
+                Value = a.Value,
             }).ToList();
 
             SortNodes(nodes);
@@ -29,9 +27,9 @@ namespace HuffmanCoding
 
                 var newNode = new HuffmanBinaryNode<T>()
                 {
-                    leftNode = nodeLeft,
-                    rightNode = nodeRight,
-                    weight = nodeLeft.weight + nodeRight.weight
+                    LeftNode = nodeLeft,
+                    RightNode = nodeRight,
+                    Weight = nodeLeft.Weight + nodeRight.Weight
                 };
 
                 nodes.Add(newNode);
@@ -40,7 +38,7 @@ namespace HuffmanCoding
 
             return new HuffmanTree<T>()
             {
-                root = nodes[0]
+                Root = nodes[0]
             };
         }
 
@@ -48,7 +46,7 @@ namespace HuffmanCoding
         {
             nodes.Sort((a, b) => 
                 {
-                    var diff = (a.weight - b.weight);
+                    var diff = (a.Weight - b.Weight);
                     return (int) diff;
                 }
             );
@@ -57,16 +55,16 @@ namespace HuffmanCoding
 
     public class HuffmanBinaryNode<T>
     {
-        public BigInteger weight;
-        public HuffmanBinaryNode<T> leftNode;
-        public HuffmanBinaryNode<T> rightNode;
+        public BigInteger Weight;
+        public HuffmanBinaryNode<T> LeftNode;
+        public HuffmanBinaryNode<T> RightNode;
         public T Value;
     }
 
     public class HuffmanEntry<T>
     {
-        public T value;
-        public BigInteger frequency;
+        public T Value;
+        public BigInteger Frequency;
     }
 
     public class HuffmanPath
@@ -85,13 +83,13 @@ namespace HuffmanCoding
         public static HuffmanTable<T> BuildTableFromTree(HuffmanTree<T> tree)
         {
             var table = new HuffmanTable<T>();
-            table.Step(tree.root, new List<HuffmanPath.Path>());
+            table.Step(tree.Root, new List<HuffmanPath.Path>());
             return table;
         }
 
         void Step(HuffmanBinaryNode<T> currentNode, List<HuffmanPath.Path> currentPath)
         {
-            if (currentNode.leftNode == null)
+            if (currentNode.LeftNode == null)
             {
                 Table.Add(currentNode.Value, currentPath);
             }
@@ -99,11 +97,11 @@ namespace HuffmanCoding
             {
                 var leftList = new List<HuffmanPath.Path>(currentPath);
                 leftList.Add(HuffmanPath.Path.Left);
-                Step(currentNode.leftNode, leftList);
+                Step(currentNode.LeftNode, leftList);
 
                 var rightList = new List<HuffmanPath.Path>(currentPath);
                 rightList.Add(HuffmanPath.Path.Right);
-                Step(currentNode.rightNode, rightList);
+                Step(currentNode.RightNode, rightList);
             }
         }
     }
