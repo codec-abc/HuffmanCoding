@@ -13,12 +13,13 @@ namespace HuffmanCoding
 
         static void Main(string[] args)
         {
-            CompressFile("./test.txt", "./compressed.bin", "./compressed-table.json");
+            RunCompression("./test.txt", "./compressed.bin", "./compressed-table.json");
+            RunDecompression("./compressed.bin", "./compressed-table.json", "decompressed.txt");
             Console.WriteLine("Done, press enter to quit");
             Console.ReadLine();
         }
 
-        private static void CompressFile(string inputFile, string outputFile, string outputTableFile)
+        private static void RunCompression(string inputFile, string outputFile, string outputTableFile)
         {
             var bytes = System.IO.File.ReadAllBytes(inputFile);
             var bytesFreq = new Dictionary<byte, int>();
@@ -81,50 +82,38 @@ namespace HuffmanCoding
             }
 
             Console.WriteLine("----------");
+            WriteCompressedFiles(outputFile, outputTableFile, bytes, huffmanBinaryTable);
+        }
 
+        private static void WriteCompressedFiles
+        (
+            string outputFile, 
+            string outputTableFile, 
+            byte[] bytes, 
+            Dictionary<byte, HuffmanTableEntry> huffmanBinaryTable
+        )
+        {
             BigInteger toWrite = 0;
             int nbBits = 0;
             BigInteger nbBitsTotal = 0;
 
             FileStream fs = File.Create(outputFile);
-
+            int byteWritten = 0;
             foreach (var b in bytes)
             {
                 var entry = huffmanBinaryTable[b];
                 toWrite = toWrite << entry.nbBits;
                 toWrite = toWrite + entry.value;
+
+                Console.WriteLine("writing " + b + " as " + entry.value + " " + Convert.ToString(entry.value, 2).PadLeft(entry.nbBits, '0') + " on " + entry.nbBits + " bits");
                 nbBits += entry.nbBits;
                 nbBitsTotal += entry.nbBits;
-
-                //Console.Write("pushing ");
-
-                //for (var i = entry.nbBits - 1; i >= 0; i--)
-                //{
-                //    var bitIndex = 1 << i;
-                //    var value = entry.value & bitIndex;
-                //    var toPrint = value != 0 ? "1" : "0";
-                //    Console.Write(toPrint);
-                //}
-
-                //Console.WriteLine("");
-
-                Console.WriteLine(" on " + entry.nbBits + " bits. Total bits is now " + nbBitsTotal);
-                //Console.Write("toWrite ");
-                //debugPrintBinary(toWrite);
-
                 if (nbBits >= 8)
                 {
                     var copy = toWrite;
                     var deltaShift = nbBits - 8;
                     var shiftBack = copy >> deltaShift;
-                    
-                    //Console.WriteLine("deltaShift " + deltaShift);
                     var bytesToWrite = shiftBack.ToByteArray();
-
-                    //Console.Write("Writing on " + bytesToWrite.Length + " byte(s) ");
-                    //debugPrintBinary(shiftBack);
-
-
                     fs.Write(bytesToWrite, 0, 1);
                     var mask = 0;
                     for (int i = 0; i < deltaShift; i++)
@@ -132,21 +121,17 @@ namespace HuffmanCoding
                         mask = mask << 1;
                         mask = mask + 1;
                     }
-                    //Console.WriteLine("mask " + Convert.ToString(mask, 2).PadLeft(8, '0'));
                     toWrite = toWrite & mask;
                     nbBits = nbBits - 8;
-                    //Console.Write("toWrite [2] ");
-                    //debugPrintBinary(toWrite);
+                    byteWritten++;
                 }
             }
 
             if (nbBits > 0)
             {
-                debugPrintBinary(toWrite);
                 var shift = 8 - nbBits;
                 toWrite = toWrite << shift;
                 var bytesToWrite = toWrite.ToByteArray();
-                //Console.WriteLine("writing byte array " + bytesToWrite);
                 fs.Write(bytesToWrite, 0, 1);
             }
 
@@ -155,12 +140,106 @@ namespace HuffmanCoding
 
             HuffmanDecodingData data = new HuffmanDecodingData()
             {
-                nbBitsWritten = nbBitsTotal,
+                nbElements = bytes.Length,
                 table = huffmanBinaryTable
             };
 
-            var jsonString = JsonConvert.SerializeObject(data);
+            var jsonString = JsonConvert.SerializeObject(data, Formatting.Indented);
             File.WriteAllText(outputTableFile, jsonString);
+        }
+
+        static void RunDecompression(string compressedFilePath, string compressedDataFilePath, string outputPath)
+        {
+            var data = File.ReadAllText(compressedDataFilePath);
+            var huffmanData = JsonConvert.DeserializeObject<HuffmanDecodingData>(data);
+
+            var bytesToDecode = File.ReadAllBytes(compressedFilePath);
+            var decoded = new List<byte>((int) huffmanData.nbElements);
+
+            BigInteger symbolsRead = 0;
+            BigInteger startingBitIndex = 0;
+            BigInteger endingBitIndex = 1;
+
+            while(symbolsRead < huffmanData.nbElements && endingBitIndex < bytesToDecode.Length * 8)
+            {
+                int currentValue = getNumberFromBitsArray(startingBitIndex, endingBitIndex, bytesToDecode);
+                debugPrintBinary(currentValue);
+                BigInteger nbBits = endingBitIndex - startingBitIndex;
+
+                byte byteValue;
+
+                if (IsValidHuffmanEntry(currentValue, nbBits, huffmanData, out byteValue))
+                {
+                    symbolsRead++;
+                    decoded.Add(byteValue);
+                    startingBitIndex = endingBitIndex + 1;
+                    endingBitIndex = startingBitIndex + 1;
+                    Console.WriteLine("found value " + byteValue);
+                }
+                else
+                {
+                    endingBitIndex++;
+                }
+            }
+
+            File.WriteAllBytes(outputPath, decoded.ToArray());
+        }
+
+        private static int getNumberFromBitsArray
+        (
+            BigInteger startingBitIndex, 
+            BigInteger endingBitIndex, 
+            byte[] bytesToDecode
+        )
+        {
+            int length = (int) (endingBitIndex - startingBitIndex);
+            int startingByteIndex = (int) startingBitIndex / 8;
+            int endingByteIndex = (int) endingBitIndex / 8;
+
+            BigInteger sequence = 0;
+
+            for (int i = startingByteIndex; i <= endingByteIndex ; i++)
+            {
+                sequence = sequence << 8;
+                sequence = sequence + bytesToDecode[i];
+            }
+
+            var rightShift = 8 - (endingBitIndex % 8);
+
+            sequence = sequence >> (int) rightShift;
+
+            var mask = 1;
+
+            for (int i = 0; i < length; i++)
+            {
+                mask = mask << 1;
+                mask = mask + 1;
+            }
+
+            sequence = sequence & mask;
+
+            return (int)sequence;
+        }
+
+        private static bool IsValidHuffmanEntry
+        (
+            int currentValue, 
+            BigInteger nbBits, 
+            HuffmanDecodingData huffmanData, 
+            out byte byteValue
+        )
+        {
+            byteValue = 0;
+            foreach (var entry in huffmanData.table)
+            {
+                if (entry.Value.nbBits == nbBits && currentValue == entry.Value.value)
+                {
+                    byteValue = entry.Key;
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         static void debugPrintBinary(BigInteger number)
@@ -201,7 +280,7 @@ namespace HuffmanCoding
 
         class HuffmanDecodingData
         {
-            public BigInteger nbBitsWritten;
+            public BigInteger nbElements;
             public Dictionary<byte, HuffmanTableEntry> table;
         }
     }
