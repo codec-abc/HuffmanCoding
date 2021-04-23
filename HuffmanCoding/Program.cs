@@ -158,27 +158,24 @@ namespace HuffmanCoding
 
             BigInteger symbolsRead = 0;
             BigInteger startingBitIndex = 0;
-            BigInteger endingBitIndex = 1;
+            BigInteger length = 1;
 
-            while(symbolsRead < huffmanData.nbElements && endingBitIndex < bytesToDecode.Length * 8)
+            while(symbolsRead < huffmanData.nbElements)
             {
-                int currentValue = getNumberFromBitsArray(startingBitIndex, endingBitIndex, bytesToDecode);
-                debugPrintBinary(currentValue);
-                BigInteger nbBits = endingBitIndex - startingBitIndex;
+                int currentValue = getNumberFromBitsArray(startingBitIndex, length, bytesToDecode);
 
                 byte byteValue;
 
-                if (IsValidHuffmanEntry(currentValue, nbBits, huffmanData, out byteValue))
+                if (IsValidHuffmanEntry(currentValue, length, huffmanData, out byteValue))
                 {
                     symbolsRead++;
                     decoded.Add(byteValue);
-                    startingBitIndex = endingBitIndex + 1;
-                    endingBitIndex = startingBitIndex + 1;
-                    Console.WriteLine("found value " + byteValue);
+                    startingBitIndex = startingBitIndex + length;
+                    length = 1;
                 }
                 else
                 {
-                    endingBitIndex++;
+                    length++;
                 }
             }
 
@@ -188,13 +185,12 @@ namespace HuffmanCoding
         private static int getNumberFromBitsArray
         (
             BigInteger startingBitIndex, 
-            BigInteger endingBitIndex, 
+            BigInteger length, 
             byte[] bytesToDecode
         )
         {
-            int length = (int) (endingBitIndex - startingBitIndex);
             int startingByteIndex = (int) startingBitIndex / 8;
-            int endingByteIndex = (int) endingBitIndex / 8;
+            int endingByteIndex = (int) (startingBitIndex + length) / 8;
 
             BigInteger sequence = 0;
 
@@ -204,11 +200,11 @@ namespace HuffmanCoding
                 sequence = sequence + bytesToDecode[i];
             }
 
-            var rightShift = 8 - (endingBitIndex % 8);
+            var rightShift = 8 - ((startingBitIndex + length) % 8);
 
             sequence = sequence >> (int) rightShift;
 
-            var mask = 1;
+            var mask = 0;
 
             for (int i = 0; i < length; i++)
             {
