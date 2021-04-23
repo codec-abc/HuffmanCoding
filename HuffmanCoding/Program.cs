@@ -17,8 +17,8 @@ namespace HuffmanCoding
         {
             RunCompression("./words.txt", "./compressed.bin", "./compressed-table.json");
             RunDecompression("./compressed.bin", "./compressed-table.json", "decompressed.txt");
-            Console.WriteLine("Done, press enter to quit");
-            Console.ReadLine();
+            //Console.WriteLine("Done, press enter to quit");
+            //Console.ReadLine();
         }
 
         private static void RunCompression(string inputFile, string outputFile, string outputTableFile)
@@ -135,6 +135,8 @@ namespace HuffmanCoding
             var data = File.ReadAllText(compressedDataFilePath);
             var huffmanData = JsonConvert.DeserializeObject<HuffmanDecodingData>(data);
 
+            var optimizedTable = BuildOptmizedTable(huffmanData);
+
             var bytesToDecode = File.ReadAllBytes(compressedFilePath);
             var decoded = new List<byte>((int) huffmanData.NbElements);
 
@@ -148,7 +150,7 @@ namespace HuffmanCoding
 
                 byte byteValue;
 
-                if (IsValidHuffmanEntry(currentValue, length, huffmanData, out byteValue))
+                if (IsValidHuffmanEntry(currentValue, length, optimizedTable, out byteValue))
                 {
                     symbolsRead++;
                     decoded.Add(byteValue);
@@ -162,6 +164,23 @@ namespace HuffmanCoding
             }
 
             File.WriteAllBytes(outputPath, decoded.ToArray());
+        }
+
+        private static Dictionary<BigInteger, Dictionary<BigInteger, byte>> BuildOptmizedTable(HuffmanDecodingData huffmanData)
+        {
+            var returned = new Dictionary<BigInteger, Dictionary<BigInteger, byte>>();
+
+            foreach(var entry in huffmanData.Table)
+            {
+                if (!returned.ContainsKey(entry.Value.NbBits))
+                {
+                    returned.Add(entry.Value.NbBits, new Dictionary<BigInteger, byte>());
+                }
+
+                returned[entry.Value.NbBits].Add(entry.Value.EncodedValue, entry.Key);
+            }
+
+            return returned;
         }
 
         private static BigInteger GetNumberFromBitsArray
@@ -202,19 +221,16 @@ namespace HuffmanCoding
         private static bool IsValidHuffmanEntry
         (
             BigInteger currentValue, 
-            BigInteger nbBits, 
-            HuffmanDecodingData huffmanData, 
+            BigInteger nbBits,
+            Dictionary<BigInteger, Dictionary<BigInteger, byte>> huffmanData, 
             out byte byteValue
         )
         {
             byteValue = 0;
-            foreach (var entry in huffmanData.Table)
+            Dictionary<BigInteger, byte> innerDict;
+            if (huffmanData.TryGetValue(nbBits, out innerDict))
             {
-                if (entry.Value.NbBits == nbBits && currentValue == entry.Value.EncodedValue)
-                {
-                    byteValue = entry.Key;
-                    return true;
-                }
+                return innerDict.TryGetValue(currentValue, out byteValue);
             }
 
             return false;
