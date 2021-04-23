@@ -190,8 +190,9 @@ namespace HuffmanCoding
             byte[] bytesToDecode
         )
         {
+            var endingBitIndex = startingBitIndex + length;
             int startingByteIndex = (int) startingBitIndex / 8;
-            int endingByteIndex = (int) (startingBitIndex + length) / 8;
+            int endingByteIndex = (int) (endingBitIndex) / 8;
 
             BigInteger sequence = 0;
 
@@ -201,16 +202,26 @@ namespace HuffmanCoding
                 sequence = sequence + bytesToDecode[i];
             }
 
-            var rightShift = 8 - ((startingBitIndex + length) % 8);
+            var rightShift = 8 - (endingBitIndex % 8);
 
             sequence = sequence >> (int) rightShift;
 
             BigInteger mask = 0;
 
-            for (int i = 0; i < length; i++)
+            if (length < 64)
             {
-                mask = mask << 1;
-                mask = mask + 1;
+                ulong mask2 = 0xffffffffffffffff;
+                mask2 >>= (64 - (int) length);
+                mask = mask2;
+            }
+            else
+            {
+                // Really bad performance
+                for (int i = 0; i < length; i++)
+                {
+                    mask = mask << 1;
+                    mask = mask + 1;
+                }
             }
 
             sequence = sequence & mask;
