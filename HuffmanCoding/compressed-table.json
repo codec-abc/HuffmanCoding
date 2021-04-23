@@ -1,0 +1,117 @@
+{
+  "nbElements": 3733450,
+  "table": {
+    "10": {
+      "nbBits": 3,
+      "value": 0
+    },
+    "45": {
+      "nbBits": 10,
+      "value": 411
+    },
+    "97": {
+      "nbBits": 4,
+      "value": 15
+    },
+    "98": {
+      "nbBits": 6,
+      "value": 24
+    },
+    "99": {
+      "nbBits": 5,
+      "value": 13
+    },
+    "100": {
+      "nbBits": 6,
+      "value": 54
+    },
+    "101": {
+      "nbBits": 3,
+      "value": 5
+    },
+    "102": {
+      "nbBits": 6,
+      "value": 17
+    },
+    "103": {
+      "nbBits": 6,
+      "value": 32
+    },
+    "104": {
+      "nbBits": 6,
+      "value": 16
+    },
+    "105": {
+      "nbBits": 4,
+      "value": 14
+    },
+    "106": {
+      "nbBits": 9,
+      "value": 204
+    },
+    "107": {
+      "nbBits": 11,
+      "value": 821
+    },
+    "108": {
+      "nbBits": 5,
+      "value": 26
+    },
+    "109": {
+      "nbBits": 5,
+      "value": 9
+    },
+    "110": {
+      "nbBits": 4,
+      "value": 9
+    },
+    "111": {
+      "nbBits": 4,
+      "value": 5
+    },
+    "112": {
+      "nbBits": 6,
+      "value": 55
+    },
+    "113": {
+      "nbBits": 8,
+      "value": 103
+    },
+    "114": {
+      "nbBits": 4,
+      "value": 12
+    },
+    "115": {
+      "nbBits": 3,
+      "value": 1
+    },
+    "116": {
+      "nbBits": 4,
+      "value": 7
+    },
+    "117": {
+      "nbBits": 5,
+      "value": 17
+    },
+    "118": {
+      "nbBits": 7,
+      "value": 66
+    },
+    "119": {
+      "nbBits": 11,
+      "value": 820
+    },
+    "120": {
+      "nbBits": 8,
+      "value": 100
+    },
+    "121": {
+      "nbBits": 8,
+      "value": 101
+    },
+    "122": {
+      "nbBits": 7,
+      "value": 67
+    }
+  }
+}

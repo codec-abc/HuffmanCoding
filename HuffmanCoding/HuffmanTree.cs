@@ -18,7 +18,7 @@ namespace HuffmanCoding
                 Value = a.value,
             }).ToList();
 
-            sortNodes(nodes);
+            SortNodes(nodes);
 
             while (nodes.Count >= 2)
             {
@@ -35,7 +35,7 @@ namespace HuffmanCoding
                 };
 
                 nodes.Add(newNode);
-                sortNodes(nodes);
+                SortNodes(nodes);
             }
 
             return new HuffmanTree<T>()
@@ -44,7 +44,7 @@ namespace HuffmanCoding
             };
         }
 
-        private static void sortNodes(List<HuffmanBinaryNode<T>> nodes)
+        private static void SortNodes(List<HuffmanBinaryNode<T>> nodes)
         {
             nodes.Sort((a, b) => 
                 {

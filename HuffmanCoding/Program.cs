@@ -11,9 +11,11 @@ namespace HuffmanCoding
     {
         // https://www.programiz.com/dsa/huffman-coding
 
+        const int NB_BITS_PACKED = 8;
+
         static void Main(string[] args)
         {
-            RunCompression("./test.txt", "./compressed.bin", "./compressed-table.json");
+            RunCompression("./words.txt", "./compressed.bin", "./compressed-table.json");
             RunDecompression("./compressed.bin", "./compressed-table.json", "decompressed.txt");
             Console.WriteLine("Done, press enter to quit");
             Console.ReadLine();
@@ -21,8 +23,8 @@ namespace HuffmanCoding
 
         private static void RunCompression(string inputFile, string outputFile, string outputTableFile)
         {
-            var bytes = System.IO.File.ReadAllBytes(inputFile);
-            var bytesFreq = new Dictionary<byte, int>();
+            var bytes = File.ReadAllBytes(inputFile);
+            var bytesFreq = new Dictionary<byte, BigInteger>();
 
             foreach (var b in bytes)
             {
@@ -67,7 +69,7 @@ namespace HuffmanCoding
                 var huffmanEntry = HuffmanPathToValueAndNbBits(entry.Item2);
                 var encodedValue = huffmanEntry.value;
                 var nbBitsEntry = huffmanEntry.nbBits;
-                //Console.WriteLine(encodedValue + " " + Convert.ToString((int)encodedValue, 2) + " " + nbBits);
+
                 Console.Write("byte " + Convert.ToChar(entry.Item1) + " has a sequence of " + entry.Item2.Count + " and is encoded ");
                 for (var i = nbBitsEntry - 1; i >= 0; i--)
                 {
@@ -95,23 +97,23 @@ namespace HuffmanCoding
         {
             BigInteger toWrite = 0;
             int nbBits = 0;
+  
             BigInteger nbBitsTotal = 0;
 
             FileStream fs = File.Create(outputFile);
-            int byteWritten = 0;
             foreach (var b in bytes)
             {
                 var entry = huffmanBinaryTable[b];
                 toWrite = toWrite << entry.nbBits;
                 toWrite = toWrite + entry.value;
 
-                Console.WriteLine("writing " + b + " as " + entry.value + " " + Convert.ToString(entry.value, 2).PadLeft(entry.nbBits, '0') + " on " + entry.nbBits + " bits");
+                //Console.WriteLine("writing " + b + " as " + entry.value + " " + Convert.ToString(entry.value, 2).PadLeft(entry.nbBits, '0') + " on " + entry.nbBits + " bits");
                 nbBits += entry.nbBits;
                 nbBitsTotal += entry.nbBits;
-                if (nbBits >= 8)
+                if (nbBits >= NB_BITS_PACKED)
                 {
                     var copy = toWrite;
-                    var deltaShift = nbBits - 8;
+                    var deltaShift = nbBits - NB_BITS_PACKED;
                     var shiftBack = copy >> deltaShift;
                     var bytesToWrite = shiftBack.ToByteArray();
                     fs.Write(bytesToWrite, 0, 1);
@@ -122,14 +124,13 @@ namespace HuffmanCoding
                         mask = mask + 1;
                     }
                     toWrite = toWrite & mask;
-                    nbBits = nbBits - 8;
-                    byteWritten++;
+                    nbBits = nbBits - NB_BITS_PACKED;
                 }
             }
 
             if (nbBits > 0)
             {
-                var shift = 8 - nbBits;
+                var shift = NB_BITS_PACKED - nbBits;
                 toWrite = toWrite << shift;
                 var bytesToWrite = toWrite.ToByteArray();
                 fs.Write(bytesToWrite, 0, 1);
@@ -162,7 +163,7 @@ namespace HuffmanCoding
 
             while(symbolsRead < huffmanData.nbElements)
             {
-                int currentValue = getNumberFromBitsArray(startingBitIndex, length, bytesToDecode);
+                BigInteger currentValue = getNumberFromBitsArray(startingBitIndex, length, bytesToDecode);
 
                 byte byteValue;
 
@@ -182,7 +183,7 @@ namespace HuffmanCoding
             File.WriteAllBytes(outputPath, decoded.ToArray());
         }
 
-        private static int getNumberFromBitsArray
+        private static BigInteger getNumberFromBitsArray
         (
             BigInteger startingBitIndex, 
             BigInteger length, 
@@ -204,7 +205,7 @@ namespace HuffmanCoding
 
             sequence = sequence >> (int) rightShift;
 
-            var mask = 0;
+            BigInteger mask = 0;
 
             for (int i = 0; i < length; i++)
             {
@@ -214,12 +215,12 @@ namespace HuffmanCoding
 
             sequence = sequence & mask;
 
-            return (int)sequence;
+            return sequence;
         }
 
         private static bool IsValidHuffmanEntry
         (
-            int currentValue, 
+            BigInteger currentValue, 
             BigInteger nbBits, 
             HuffmanDecodingData huffmanData, 
             out byte byteValue
