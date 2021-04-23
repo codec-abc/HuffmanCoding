@@ -24,7 +24,7 @@ namespace HuffmanCoding
         private static void RunCompression(string inputFile, string outputFile, string outputTableFile)
         {
             var bytes = File.ReadAllBytes(inputFile);
-            var bytesFreq = new Dictionary<byte, BigInteger>();
+            var bytesFreq = new Dictionary<byte, ulong>();
 
             foreach (var b in bytes)
             {
@@ -77,10 +77,10 @@ namespace HuffmanCoding
             Dictionary<byte, HuffmanTableEntry> huffmanBinaryTable
         )
         {
-            BigInteger toWrite = 0;
+            int toWrite = 0;
             int nbBits = 0;
-  
-            BigInteger nbBitsTotal = 0;
+
+            int nbBitsTotal = 0;
 
             FileStream fs = File.Create(outputFile);
             foreach (var b in bytes)
@@ -94,11 +94,11 @@ namespace HuffmanCoding
                 if (nbBits >= NB_BITS_PACKED)
                 {
                     var copy = toWrite;
-                    var deltaShift = nbBits - NB_BITS_PACKED;
-                    var shiftBack = copy >> deltaShift;
+                    int deltaShift = nbBits - NB_BITS_PACKED;
+                    BigInteger shiftBack = copy >> deltaShift;
                     var bytesToWrite = shiftBack.ToByteArray();
                     fs.Write(bytesToWrite, 0, 1);
-                    var mask = 0;
+                    int mask = 0;
                     for (int i = 0; i < deltaShift; i++)
                     {
                         mask = mask << 1;
@@ -113,7 +113,7 @@ namespace HuffmanCoding
             {
                 var shift = NB_BITS_PACKED - nbBits;
                 toWrite = toWrite << shift;
-                var bytesToWrite = toWrite.ToByteArray();
+                var bytesToWrite = (new BigInteger(toWrite)).ToByteArray();
                 fs.Write(bytesToWrite, 0, 1);
             }
 
@@ -138,15 +138,15 @@ namespace HuffmanCoding
             var optimizedTable = BuildOptmizedTable(huffmanData);
 
             var bytesToDecode = File.ReadAllBytes(compressedFilePath);
-            var decoded = new List<byte>((int) huffmanData.NbElements);
+            var decoded = new List<byte>(huffmanData.NbElements);
 
-            BigInteger symbolsRead = 0;
-            BigInteger startingBitIndex = 0;
-            BigInteger length = 1;
+            int symbolsRead = 0;
+            int startingBitIndex = 0;
+            int length = 1;
 
             while(symbolsRead < huffmanData.NbElements)
             {
-                BigInteger currentValue = GetNumberFromBitsArray(startingBitIndex, length, bytesToDecode);
+                int currentValue = GetNumberFromBitsArray(startingBitIndex, length, bytesToDecode);
 
                 byte byteValue;
 
@@ -166,15 +166,15 @@ namespace HuffmanCoding
             File.WriteAllBytes(outputPath, decoded.ToArray());
         }
 
-        private static Dictionary<BigInteger, Dictionary<BigInteger, byte>> BuildOptmizedTable(HuffmanDecodingData huffmanData)
+        private static Dictionary<int, Dictionary<int, byte>> BuildOptmizedTable(HuffmanDecodingData huffmanData)
         {
-            var returned = new Dictionary<BigInteger, Dictionary<BigInteger, byte>>();
+            var returned = new Dictionary<int, Dictionary<int, byte>>();
 
             foreach(var entry in huffmanData.Table)
             {
                 if (!returned.ContainsKey(entry.Value.NbBits))
                 {
-                    returned.Add(entry.Value.NbBits, new Dictionary<BigInteger, byte>());
+                    returned.Add(entry.Value.NbBits, new Dictionary<int, byte>());
                 }
 
                 returned[entry.Value.NbBits].Add(entry.Value.EncodedValue, entry.Key);
@@ -183,10 +183,10 @@ namespace HuffmanCoding
             return returned;
         }
 
-        private static BigInteger GetNumberFromBitsArray
+        private static int GetNumberFromBitsArray
         (
-            BigInteger startingBitIndex, 
-            BigInteger length, 
+            int startingBitIndex,
+            int length, 
             byte[] bytesToDecode
         )
         {
@@ -194,7 +194,7 @@ namespace HuffmanCoding
             int startingByteIndex = (int) startingBitIndex / 8;
             int endingByteIndex = (int) (endingBitIndex) / 8;
 
-            BigInteger sequence = 0;
+            int sequence = 0;
 
             for (int i = startingByteIndex; i <= endingByteIndex ; i++)
             {
@@ -206,13 +206,13 @@ namespace HuffmanCoding
 
             sequence = sequence >> (int) rightShift;
 
-            BigInteger mask = 0;
+            int mask = 0;
 
-            if (length < 64)
+            if (length < 32)
             {
-                ulong mask2 = 0xffffffffffffffff;
-                mask2 >>= (64 - (int) length);
-                mask = mask2;
+                uint mask2 = 0xffffffff;
+                mask2 >>= (32 - length);
+                mask = (int) mask2;
             }
             else
             {
@@ -231,14 +231,14 @@ namespace HuffmanCoding
 
         private static bool IsValidHuffmanEntry
         (
-            BigInteger currentValue, 
-            BigInteger nbBits,
-            Dictionary<BigInteger, Dictionary<BigInteger, byte>> huffmanData, 
+            int currentValue,
+            int nbBits,
+            Dictionary<int, Dictionary<int, byte>> huffmanData, 
             out byte byteValue
         )
         {
             byteValue = 0;
-            Dictionary<BigInteger, byte> innerDict;
+            Dictionary<int, byte> innerDict;
             if (huffmanData.TryGetValue(nbBits, out innerDict))
             {
                 return innerDict.TryGetValue(currentValue, out byteValue);
@@ -275,7 +275,7 @@ namespace HuffmanCoding
 
         class HuffmanDecodingData
         {
-            public BigInteger NbElements;
+            public int NbElements;
             public Dictionary<byte, HuffmanTableEntry> Table;
         }
     }
